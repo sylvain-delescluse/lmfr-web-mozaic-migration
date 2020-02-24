@@ -1,0 +1,12 @@
+*~
+.DS_Store
+Thumbs.db
+node_modules
+tmp
+*.sh
+.idea
+*.bak
+*.bat
+*_backup_folder
+app.js
+gulp.js

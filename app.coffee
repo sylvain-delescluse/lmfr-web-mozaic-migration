@@ -10,29 +10,72 @@ module.exports = class App
   constructor: ->
     console.log "process.cwd()".cyan, process.cwd()
 
-    @getFilesByExt('ftl', no).then (ftlFiles) ->
+    @getFilesByExt('ftl', process.cwd(), yes).then (ftlFiles) =>
       console.log 'ftlFiles:', ftlFiles
 
+      for filePath in ftlFiles
+        @processHref filePath
 
-  getFilesByExt: (pExt, pWithUnderscore) ->
-    deferred = q.defer()
-    fs.readdir process.cwd(), (err, files) ->
+
+  detectLinkImport: (pFileData, pImportFilename) ->
+    regex = new RegExp '<#import "([./]*)macros\/common\/' + pImportFilename + '.ftl" as ([a-zA-Z]*)>' , 'gi'
+    ftlImports = pFileData.match regex
+    console.log 'ftlImports:', ftlImports
+
+
+  processHref: (pPath) ->
+    console.log ('\n\nLook for <a > in ' + pPath + '').blue
+    fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
-        deferred.reject err
       else
-        filesByExt = files.filter (file) ->
-          if pWithUnderscore
-            return file.indexOf('.' + pExt) isnt -1
-          else
-            return file.indexOf('.' + pExt) isnt -1 and file.substr(0, 1) isnt '_'
 
-        if filesByExt.length is 0
-          console.log ('No .' + pExt + ' files found!').red
-          deferred.resolve []
+        regex = /<a[^\>]+>/ig
+        ahrefs = data.match regex
+
+        if ahrefs.length > 0
+          @detectLinkImport data, 'link'
+
+        console.log 'ahrefs', ahrefs
+
+
+  getFilesByExt: (pExt, pDir, pWithUnderscore) ->
+    deferred = q.defer()
+    files = fs.readdirSync pDir
+
+    filesByExt = files.filter (file) ->
+      if pWithUnderscore
+        return file.indexOf('.' + pExt) isnt -1
+      else
+        return file.indexOf('.' + pExt) isnt -1 and file.substr(0, 1) isnt '_'
+
+    filesByExt = filesByExt.map (f) ->
+      return pDir + '/' + f
+
+    directories = files.filter (file) ->
+      if fs.statSync(pDir + '/' + file).isDirectory()
+        if pWithUnderscore
+          return yes
         else
-          console.log filesByExt.length + ' file(s) (with extension ".' + pExt + '") found!'
-          deferred.resolve filesByExt
+          return file.substr(0, 1) isnt '_'
+
+    if directories.length > 0
+      promises = []
+      directories.forEach (dir) =>
+        dirPath = pDir + '/' + dir
+
+        if dirPath.indexOf('node_modules') is -1 and dirPath.indexOf('git') is -1
+          p = @getFilesByExt pExt, dirPath, pWithUnderscore
+          promises.push p
+
+      q.all(promises).then (pResults) ->
+        pResults.forEach (fArr) ->
+          filesByExt = filesByExt.concat fArr
+
+        deferred.resolve filesByExt
+
+    else
+      deferred.resolve filesByExt
 
     deferred.promise
 

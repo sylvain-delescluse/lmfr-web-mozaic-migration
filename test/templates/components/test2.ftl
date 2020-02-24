@@ -15,12 +15,12 @@
             </div>
 
             <div class="m-button-container mu-mt-100">
-                <a href="/espace-perso/fidelite/ma-carte" class="ka-button">Revenir à ma fidélité</a>
+                <a href="/espace-perso/fidelite/ma-carte_3" class="ka-button">Autre lien 3</a>
             </div>
         </div>
     </section>
 
     <section>
-        <a href="/espace-perso/fidelite/ma-carte-2" class="ka-button">Autre lien</a>
+        <a href="/espace-perso/fidelite/ma-carte-4" class="ka-button">Autre lien 4</a>
     </section>
 </div>

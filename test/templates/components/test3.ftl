@@ -23,4 +23,23 @@
     <section>
         <a href="/espace-perso/fidelite/ma-carte-6" class="ka-button">Autre lien 6</a>
     </section>
+
+    <#--  Remise 0 pts ou remise x pts / 1000 -->
+    <div class="m-discount__box m-discount__box${class} ${isHidden}">
+        <div class="m-discount__info">
+        <#if loyalty.missingPointsBeforeNextDiscount! == 1000 || loyalty.isExpired>
+            <p class="a-picto-discount a-picto-discount--isNotActive">10<span>%</span></p>
+        <#else>
+            ${isComing!}
+        </#if>
+            <div class="m-discount__content">
+                <p class="m-discount__title"><@icons.icon iconPath="Universe_Security_32px"/>Remise de Fidélité</p>
+                <span class="m-discount__text">Encore ${loyalty.missingPointsBeforeNextDiscount!} pts pour en bénéficier.</span>
+                <span class="m-discount__pts">1pt = 1,5 € dépensés</span>
+            </div>
+            <a href="#" data-target="js-my-popin-fidNotActive" class="js-show-popin class-test-3">
+                <@icons.icon iconPath="Navigation_Notification_Information_24px" class="m-discount__ico" />
+            </a>
+        </div>
+    </div>
 </div>

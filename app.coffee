@@ -42,14 +42,37 @@ module.exports = class App
       if err
         console.log 'err:'.red, err
       else
-
-        regex = /<a[^\>]+>/ig
-        ahrefs = data.match regex
-
+        hrefReg = /([ \t]*)<a[^\>]+href=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
+        ahrefs = data.match hrefReg
         if ahrefs.length > 0
           data = @detectMacroImport data, pPath, 'link'
 
-        console.log 'ahrefs', ahrefs
+          ahrefs.forEach (ahref) ->
+            console.log '\nahref', ahref
+
+            regexLinkClass = new RegExp '([ \t]*)<a[^\>]+class=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
+
+            # Get Class
+            ahrefClassResult = regexLinkClass.exec ahref
+            ahrefIndent = ahrefClassResult[1]
+            console.log 'ahrefIndent', ahrefIndent
+            ahrefClass = ahrefClassResult[2]
+            console.log 'ahrefClass', ahrefClass
+
+            # Get href
+            regexLinkHref = new RegExp '([ \t]*)<a[^\>]+href=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
+            ahrefHrefResult = regexLinkHref.exec ahref
+            ahrefHref = ahrefHrefResult[2]
+            console.log 'ahrefHref', ahrefHref
+            ahrefContent = ahrefHrefResult[3]
+            console.log 'ahrefContent', ahrefContent
+
+            # Get data attribute (Get only one data-[attribute] for now :-( )
+            regexLinkDataAttr = new RegExp '([ \t]*)<a[^\\>]+data-([\\w]+)=[\'|"]([^\'|"]*)[\'|"][^\\>]*>([\\w\\W]*?)<\\/a>', 'gi'
+            ahrefHrefResult = regexLinkDataAttr.exec ahref
+            ahrefDataAttr = if ahrefHrefResult then ahrefHrefResult[2]
+            console.log 'ahrefDataAttr', ahrefDataAttr
+
 
 
   getFilesByExt: (pExt, pDir, pWithUnderscore) ->

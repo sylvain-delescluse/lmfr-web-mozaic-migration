@@ -7,6 +7,9 @@ path = require 'path'
 
 module.exports = class App
 
+  commonMacrosLinkPath: undefined
+  commonMacrosButtonPath: undefined
+
   constructor: ->
     console.log "process.cwd()".cyan, process.cwd()
 
@@ -14,13 +17,23 @@ module.exports = class App
       console.log 'ftlFiles:', ftlFiles
 
       for filePath in ftlFiles
-        @processHref filePath
+        if filePath.indexOf('templates/macros/common') isnt -1
+          if filePath.indexOf('templates/macros/common/link.ftl') isnt -1
+            @commonMacrosLinkPath = filePath
+          if filePath.indexOf('templates/macros/common/button.ftl') isnt -1
+            @commonMacrosButtonPath = filePath
+        else
+          @processHref filePath
 
 
-  detectLinkImport: (pFileData, pImportFilename) ->
+  detectMacroImport: (pFileData, pFilePath, pImportFilename) ->
     regex = new RegExp '<#import "([./]*)macros\/common\/' + pImportFilename + '.ftl" as ([a-zA-Z]*)>' , 'gi'
     ftlImports = pFileData.match regex
-    console.log 'ftlImports:', ftlImports
+
+    if not ftlImports
+      pFileData = '<#import "' + path.relative(pFilePath, @commonMacrosLinkPath) + '" as ' + pImportFilename + '>\n' + pFileData
+
+    return pFileData
 
 
   processHref: (pPath) ->
@@ -34,7 +47,7 @@ module.exports = class App
         ahrefs = data.match regex
 
         if ahrefs.length > 0
-          @detectLinkImport data, 'link'
+          data = @detectMacroImport data, pPath, 'link'
 
         console.log 'ahrefs', ahrefs
 

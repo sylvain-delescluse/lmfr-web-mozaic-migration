@@ -37,7 +37,7 @@
                 <span class="m-discount__text">Encore ${loyalty.missingPointsBeforeNextDiscount!} pts pour en bénéficier.</span>
                 <span class="m-discount__pts">1pt = 1,5 € dépensés</span>
             </div>
-            <a href="#" data-target="js-my-popin-fidNotActive" class="js-show-popin class-test-2"><@icons.icon iconPath="Navigation_Notification_Information_24px" class="m-discount__ico" /></a>
+            <a href="#" data-target="js-my-popin-fidNotActive" class="js-show-popin class-test-2"><@icons.icon iconPath="Navigation_Notification_Information_24px" class="m-discount__ico" />right text test</a>
         </div>
     </div>
 

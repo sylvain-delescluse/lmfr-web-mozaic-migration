@@ -47,12 +47,11 @@ module.exports = class App
         if ahrefs.length > 0
           data = @detectMacroImport data, pPath, 'link'
 
-          ahrefs.forEach (ahref) ->
+          ahrefs.forEach (ahref) =>
             console.log '\nahref', ahref
 
-            regexLinkClass = new RegExp '([ \t]*)<a[^\>]+class=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
-
             # Get Class
+            regexLinkClass = new RegExp '([ \t]*)<a[^\>]+class=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
             ahrefClassResult = regexLinkClass.exec ahref
             ahrefIndent = ahrefClassResult[1]
             console.log 'ahrefIndent', ahrefIndent
@@ -66,6 +65,8 @@ module.exports = class App
             console.log 'ahrefHref', ahrefHref
             ahrefContent = ahrefHrefResult[3]
             console.log 'ahrefContent', ahrefContent
+            iconData = @getIconData ahrefContent
+            console.log 'iconData', iconData
 
             regexOnlyHeadTag = /<a[^\>]*>/ig
             ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
@@ -91,6 +92,29 @@ module.exports = class App
             ###
 
 
+  getIconData: (pData) ->
+    retData = {}
+    iconReg = /([^.]*)<@[^\>]+icon[^\>]+iconPath=['|"]([^'|"]*)['|"][^\>]*>([^.]*)/ig
+    icons = pData.match iconReg
+    if icons and icons.length > 0
+      icon = icons[0]
+      iconPathRes = iconReg.exec icon
+      retData.id = iconPathRes[2]
+
+      iconLeftTextRes = iconPathRes[1].replace /[\s]*/g, ''
+      iconRightTextRes = iconPathRes[3].replace /[\s]*/g, ''
+      iconLeftTextLength = iconLeftTextRes.length
+      iconRightTextLength = iconRightTextRes.length
+
+      if iconLeftTextLength > 0
+        retData.side = 'right'
+
+      if iconRightTextLength > 0
+        retData.side = 'left'
+
+      retData.iconOnly = (iconLeftTextLength is 0 and iconRightTextLength is 0)
+
+    retData
 
 
   getFilesByExt: (pExt, pDir, pWithUnderscore) ->

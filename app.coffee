@@ -37,14 +37,14 @@ module.exports = class App
 
 
   processHref: (pPath) ->
-    console.log ('\n\nLook for <a > in ' + pPath + '').blue
+    console.log ('\nLook for <a > in ' + pPath + '').blue
     fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
       else
         hrefReg = /([ \t]*)<a[^\>]+href=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
         ahrefs = data.match hrefReg
-        if ahrefs.length > 0
+        if ahrefs and ahrefs.length > 0
           data = @detectMacroImport data, pPath, 'link'
 
           ahrefs.forEach (ahref) =>
@@ -54,19 +54,19 @@ module.exports = class App
             regexLinkClass = new RegExp '([ \t]*)<a[^\>]+class=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
             ahrefClassResult = regexLinkClass.exec ahref
             ahrefIndent = ahrefClassResult[1]
-            console.log 'ahrefIndent', ahrefIndent
+            #console.log 'ahrefIndent', ahrefIndent
             ahrefClass = ahrefClassResult[2]
-            console.log 'ahrefClass', ahrefClass
+            #console.log 'ahrefClass', ahrefClass
 
             # Get href
             regexLinkHref = new RegExp '([ \t]*)<a[^\>]+href=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
             ahrefHrefResult = regexLinkHref.exec ahref
             ahrefHref = ahrefHrefResult[2]
-            console.log 'ahrefHref', ahrefHref
+            #console.log 'ahrefHref', ahrefHref
             ahrefContent = ahrefHrefResult[3]
-            console.log 'ahrefContent', ahrefContent
+            #console.log 'ahrefContent', ahrefContent
             iconData = @getIconData ahrefContent
-            console.log 'iconData', iconData
+            #console.log 'iconData', iconData
 
             regexOnlyHeadTag = /<a[^\>]*>/ig
             ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
@@ -82,8 +82,8 @@ module.exports = class App
                 linkDataAttrs.push
                   name: linkDataAttr[1]
                   value: linkDataAttr[2]
-            console.log 'linkDataAttrs:'.cyan, linkDataAttrs
-            console.log 'ahrefDataCerberusAttr:'.cyan, ahrefDataCerberusAttr
+            #console.log 'linkDataAttrs:'.cyan, linkDataAttrs
+            #console.log 'ahrefDataCerberusAttr:'.cyan, ahrefDataCerberusAttr
 
             macroLinkData =
               href: ahrefHref
@@ -104,7 +104,9 @@ module.exports = class App
 
             macroLinkData.cssClass = ahrefClass.trim()
 
-            @replaceLinkWithMacro pPath, data, ahref, macroLinkData
+            data = @replaceLinkWithMacro pPath, data, ahref, macroLinkData
+
+          @writeDataInFile pPath, data
 
 
   keepLastWord: (pPath) ->
@@ -128,16 +130,18 @@ module.exports = class App
     linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
     if pLinkData.size then linkConfigStr += '' + pLinkData.indent + '    "size": "' + pLinkData.size + '",\n'
-    if pLinkData.icon then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
+    if pLinkData.icon and Object.keys(pLinkData.icon).length > 0 then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
     if pLinkData.cssClass then linkConfigStr += '' + pLinkData.indent + '    "cssClass": "' + pLinkData.cssClass + '",\n'
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
-    if pLinkData.dataAttributes then linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
+    if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0 then linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
+    linkConfigStr = linkConfigStr.substring 0, linkConfigStr.length - 2
+    linkConfigStr += '\n'
     linkConfigStr += pLinkData.indent + '} >\n'
     linkConfigStr += pLinkData.indent + '<@link.linkMozaic ' + configName + '>' + pLinkData.content + '</@link.linkMozaic>'
 
     pFileData = pFileData.replace pLinkSrc, linkConfigStr
-    console.log 'pFileData:', pFileData
 
+    pFileData
 
 
   getIconData: (pData) ->
@@ -206,8 +210,8 @@ module.exports = class App
     deferred.promise
 
 
-  writeDataInFile: (pType, pPath, pData) ->
-    console.log ('Overwrite ' + pType + ' file !!!').yellow
+  writeDataInFile: (pPath, pData) ->
+    console.log ('Overwrite ' + pPath + ' file !!!').yellow
     deferred = q.defer()
 
     relative = path.relative process.cwd(), pPath
@@ -216,10 +220,10 @@ module.exports = class App
     try
       fs.writeFile pPath, pData, 'utf8', (err, data) ->
         if err
-          console.log (' Error to write ' + pType + ' the file').red, err
+          console.log (' Error to write ' + pPath).red, err
           deferred.reject err
         else
-          console.log (' The ' + pType + ' file has been overwritten').green
+          console.log (pPath + ' has been overwritten').green
           deferred.resolve()
     catch error
       console.log 'catch error'.red, error

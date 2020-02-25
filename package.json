@@ -5,7 +5,7 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Syldel/lmfr-web-mosaic-migration.git"
+    "url": "git@github.com:sylvain-delescluse/lmfr-web-mosaic-migration.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -24,7 +24,7 @@
     "prompt": "^1.0.0",
     "q": "^1.5.1"
   },
-  "homepage": "https://github.com/Syldel/lmfr-web-mosaic-migration#readme",
+  "homepage": "https://github.com/sylvain-delescluse/lmfr-web-mosaic-migration#readme",
   "bin": {
     "lm-mosaic": "bin/lm-mosaic.js"
   },

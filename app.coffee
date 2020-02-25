@@ -71,25 +71,73 @@ module.exports = class App
             regexOnlyHeadTag = /<a[^\>]*>/ig
             ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
             ahrefHeadTag = ahrefOnlyHeadTag[0]
-            #console.log 'ahrefHeadTag:', ahrefHeadTag
 
             # Get data attributes
-            #regexLinkDataAttr = new RegExp '([ \t]*)<a[^\\>]+data-([\\w]+)=[\'|"]([^\'|"]*)[\'|"][^\\>]*>([\\w\\W]*?)<\\/a>', 'gi'
-            #regexLinkDataAttr = /([ \t]*)<a[^\>]+data-((?!cerberus).*?)=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
             regexLinkDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
             linkDataAttrs = []
             while ((linkDataAttr = regexLinkDataAttr.exec(ahrefHeadTag)) isnt null)
-              linkDataAttrs.push
-                name: linkDataAttr[1]
-                value: linkDataAttr[2]
+              if linkDataAttr[1] is 'cerberus'
+                ahrefDataCerberusAttr = linkDataAttr[2]
+              else
+                linkDataAttrs.push
+                  name: linkDataAttr[1]
+                  value: linkDataAttr[2]
             console.log 'linkDataAttrs:'.cyan, linkDataAttrs
+            console.log 'ahrefDataCerberusAttr:'.cyan, ahrefDataCerberusAttr
 
-            ###
-            regexLinkCerberusAttr = /([ \t]*)<a[^\>]+data-cerberus=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
-            ahrefHrefResult = regexLinkCerberusAttr.exec ahref
-            ahrefDataCerberusAttr = if ahrefHrefResult then ahrefHrefResult[2]
-            console.log 'ahrefDataCerberusAttr', ahrefDataCerberusAttr
-            ###
+            macroLinkData =
+              href: ahrefHref
+              icon: iconData
+              #dataTagco: 'todo'
+              #dataTcevent: 'todo'
+              cerberus: ahrefDataCerberusAttr
+              dataAttributes: linkDataAttrs
+
+              content: ahrefContent
+              indent: ahrefIndent
+
+            if ahrefClass.indexOf('ka-link--s') isnt -1
+              macroLinkData.size = 's'
+
+            ahrefClass = ahrefClass.replace 'ka-link--s', ''
+            ahrefClass = ahrefClass.replace 'ka-link', ''
+
+            macroLinkData.cssClass = ahrefClass.trim()
+
+            @replaceLinkWithMacro pPath, data, ahref, macroLinkData
+
+
+  keepLastWord: (pPath) ->
+    pathArr = pPath.split '/'
+    lastPathNameExt = pathArr[pathArr.length - 1]
+    lastPathNameArr = lastPathNameExt.split '.'
+    lastPathName = String(lastPathNameArr[0]).toLowerCase()
+    lastPathName += Math.floor Math.random() * 100
+    lastPathName
+
+
+  replaceLinkWithMacro: (pPath, pFileData, pLinkSrc, pLinkData) ->
+    lastPathName = @keepLastWord pPath
+
+    if pLinkData.href and pLinkData.href isnt '' and pLinkData.href isnt '#'
+      lastPathName += @keepLastWord pLinkData.href
+
+    lastPathName = lastPathName.replace /[^a-z0-9]*/gi, ''
+    configName = lastPathName + 'LinkConfig'
+
+    linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
+    if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
+    if pLinkData.size then linkConfigStr += '' + pLinkData.indent + '    "size": "' + pLinkData.size + '",\n'
+    if pLinkData.icon then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
+    if pLinkData.cssClass then linkConfigStr += '' + pLinkData.indent + '    "cssClass": "' + pLinkData.cssClass + '",\n'
+    if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
+    if pLinkData.dataAttributes then linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
+    linkConfigStr += pLinkData.indent + '} >\n'
+    linkConfigStr += pLinkData.indent + '<@link.linkMozaic ' + configName + '>' + pLinkData.content + '</@link.linkMozaic>'
+
+    pFileData = pFileData.replace pLinkSrc, linkConfigStr
+    console.log 'pFileData:', pFileData
+
 
 
   getIconData: (pData) ->

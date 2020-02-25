@@ -42,4 +42,9 @@
             </a>
         </div>
     </div>
+
+    <div class="l-myCard__inner">
+        <p class="l-myCard__text"><@icons.icon iconPath="User_Card_LoyaltyCard_48px" class="l-myCard__picto"/> Ma Carte Maison</p>
+        <a href="/v3/compteinternaute/espaceperso/cartemaison/macarte.do" class="l-myCard__link">Consulter mes avantages <@icons.icon iconPath="Navigation_Arrow_Arrow--Right_32px" class="l-myCard__arrow"/></a>
+    </div>
 </div>

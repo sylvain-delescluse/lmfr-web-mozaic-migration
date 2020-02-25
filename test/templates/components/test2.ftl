@@ -40,4 +40,8 @@
             <a href="#" data-target="js-my-popin-fidNotActive" class="js-show-popin class-test-2"><@icons.icon iconPath="Navigation_Notification_Information_24px" class="m-discount__ico" /></a>
         </div>
     </div>
+
+    <#if !hasValidLoyaltyCard && !isReadherable>
+        <a href="/fidelite/adhesion/mesdonnees?type=1" class="ka-button ka-button--full" data-target="js-my-popin-fidNotActive" data-target2="js-my-popin-fidNotActive2" data-cerberus="BTN_adhererEnLigne">Adhérer à la Carte Maison 1 an</a>
+    </#if>
 </div>

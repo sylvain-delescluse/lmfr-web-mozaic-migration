@@ -67,11 +67,29 @@ module.exports = class App
             ahrefContent = ahrefHrefResult[3]
             console.log 'ahrefContent', ahrefContent
 
-            # Get data attribute (Get only one data-[attribute] for now :-( )
-            regexLinkDataAttr = new RegExp '([ \t]*)<a[^\\>]+data-([\\w]+)=[\'|"]([^\'|"]*)[\'|"][^\\>]*>([\\w\\W]*?)<\\/a>', 'gi'
-            ahrefHrefResult = regexLinkDataAttr.exec ahref
-            ahrefDataAttr = if ahrefHrefResult then ahrefHrefResult[2]
-            console.log 'ahrefDataAttr', ahrefDataAttr
+            regexOnlyHeadTag = /<a[^\>]*>/ig
+            ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
+            ahrefHeadTag = ahrefOnlyHeadTag[0]
+            #console.log 'ahrefHeadTag:', ahrefHeadTag
+
+            # Get data attributes
+            #regexLinkDataAttr = new RegExp '([ \t]*)<a[^\\>]+data-([\\w]+)=[\'|"]([^\'|"]*)[\'|"][^\\>]*>([\\w\\W]*?)<\\/a>', 'gi'
+            #regexLinkDataAttr = /([ \t]*)<a[^\>]+data-((?!cerberus).*?)=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
+            regexLinkDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
+            linkDataAttrs = []
+            while ((linkDataAttr = regexLinkDataAttr.exec(ahrefHeadTag)) isnt null)
+              linkDataAttrs.push
+                name: linkDataAttr[1]
+                value: linkDataAttr[2]
+            console.log 'linkDataAttrs:'.cyan, linkDataAttrs
+
+            ###
+            regexLinkCerberusAttr = /([ \t]*)<a[^\>]+data-cerberus=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
+            ahrefHrefResult = regexLinkCerberusAttr.exec ahref
+            ahrefDataCerberusAttr = if ahrefHrefResult then ahrefHrefResult[2]
+            console.log 'ahrefDataCerberusAttr', ahrefDataCerberusAttr
+            ###
+
 
 
 

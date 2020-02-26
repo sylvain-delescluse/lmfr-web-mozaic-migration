@@ -14,9 +14,31 @@ module.exports = class App
 
   constructor: ->
     console.log "process.cwd()".cyan, process.cwd()
+    @startPrompt()
 
+
+  startPrompt: ->
+    console.log 'Please choose the processus ("link" or "button")'.blue.bold
+    prompt.start()
+
+    promptSchema =
+      properties:
+        type:
+          pattern: /^[a-z]+$/
+          message: 'Source must be only letters'
+          required: true
+          default: 'button'
+
+    prompt.get promptSchema, (err, result) =>
+      if err
+        console.log "error:".red, err
+      else
+        console.log 'You\'ve choosen the type:', (result.type).cyan
+        @startExploration result.type
+
+
+  startExploration: (pType) ->
     @getFilesByExt('ftl', process.cwd(), yes).then (ftlFiles) =>
-      console.log 'ftlFiles:', ftlFiles
 
       for filePath in ftlFiles
         if filePath.indexOf('templates/macros/common') isnt -1
@@ -25,7 +47,10 @@ module.exports = class App
           if filePath.indexOf('templates/macros/common/button.ftl') isnt -1
             @commonMacrosButtonPath = filePath
         else
-          @processHref filePath
+          if pType is 'link'
+            @processHref filePath
+          if pType is 'button'
+            @processButton filePath
 
 
   detectMacroImport: (pFileData, pFilePath, pImportFilename) ->
@@ -107,6 +132,21 @@ module.exports = class App
             data = @replaceLinkWithMacro pPath, data, ahref, macroLinkData
 
           @writeDataInFile pPath, data
+
+
+  processButton: (pPath) ->
+    console.log ('\nLook for <button > in ' + pPath + '').blue
+    fs.readFile pPath, 'utf8', (err, data) =>
+      if err
+        console.log 'err:'.red, err
+      else
+        btnReg = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/ig
+        btns = data.match btnReg
+        if btns and btns.length > 0
+          data = @detectMacroImport data, pPath, 'button'
+
+          btns.forEach (btn) ->
+            console.log '\nbtn', btn
 
 
   getAttributes: (pHeadTagStr) ->

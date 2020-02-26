@@ -44,4 +44,7 @@
     <#if !hasValidLoyaltyCard && !isReadherable>
         <a href="/fidelite/adhesion/mesdonnees?type=1" class="ka-button ka-button--full" data-target="js-my-popin-fidNotActive" data-target2="js-my-popin-fidNotActive2" data-cerberus="BTN_adhererEnLigne">Adhérer à la Carte Maison 1 an</a>
     </#if>
+
+    <button class="l-loyaltyCard__link js-show-adv-popin ka-link">Voir plus de détails</button>
+    <#--  <button class="ka-button">Adhérer à la Carte Maison 1 an</button> -->
 </div>

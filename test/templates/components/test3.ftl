@@ -53,4 +53,14 @@
             Je découvre les avantages <@icons.icon iconPath="Navigation_Arrow_Arrow--Right_24px" class="m-loyaltyCard__linkArrow"/>
         </a>
     </div>
+
+    <button type="submit" class="ka-button ka-button--full mu-mt-150 mu-mb-300 js-submit-form" disabled>
+        <#if is_Adhesion>
+            Valider mon adhésion
+        <#elseif is_Readhesion>
+            Valider ma réadhésion
+        </#if>
+    </button>
+
+    <button type="submit" class="ka-button ka-button--full ku-fa-center mu-mb-200">Continuer</button>
 </div>

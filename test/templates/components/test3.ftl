@@ -47,4 +47,10 @@
         <p class="l-myCard__text"><@icons.icon iconPath="User_Card_LoyaltyCard_48px" class="l-myCard__picto"/> Ma Carte Maison</p>
         <a href="/v3/compteinternaute/espaceperso/cartemaison/macarte.do" class="l-myCard__link">Consulter mes avantages <@icons.icon iconPath="Navigation_Arrow_Arrow--Right_32px" class="l-myCard__arrow"/></a>
     </div>
+
+    <div>
+        <a href="https://m1.lmcdn.fr/media/15/5e37ee987eb45f518507d94e/175899224/nouvel-emmenage5e37ee98de91bb0008f1209d.pdf" target="_blank" class="ka-link">
+            Je découvre les avantages <@icons.icon iconPath="Navigation_Arrow_Arrow--Right_24px" class="m-loyaltyCard__linkArrow"/>
+        </a>
+    </div>
 </div>

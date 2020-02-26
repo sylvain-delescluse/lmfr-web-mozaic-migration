@@ -7,10 +7,10 @@ path = require 'path'
 
 module.exports = class App
 
-  commonMacrosLinkPath: undefined
-  commonMacrosButtonPath: undefined
+  commonMacrosPaths: {}
 
   macroLinkConfigCount: 0
+  macroButtonConfigCount: 0
 
   constructor: ->
     console.log "process.cwd()".cyan, process.cwd()
@@ -42,10 +42,8 @@ module.exports = class App
 
       for filePath in ftlFiles
         if filePath.indexOf('templates/macros/common') isnt -1
-          if filePath.indexOf('templates/macros/common/link.ftl') isnt -1
-            @commonMacrosLinkPath = filePath
-          if filePath.indexOf('templates/macros/common/button.ftl') isnt -1
-            @commonMacrosButtonPath = filePath
+          if filePath.indexOf('templates/macros/common/' + pType + '.ftl') isnt -1
+            @commonMacrosPaths[pType] = filePath
         else
           if pType is 'link'
             @processHref filePath
@@ -54,13 +52,13 @@ module.exports = class App
 
 
   detectMacroImport: (pFileData, pFilePath, pImportFilename) ->
-    regex = new RegExp '<#import "([./]*)macros\/common\/' + pImportFilename + '.ftl" as ([a-zA-Z]*)>' , 'gi'
+    regex = new RegExp '<#import "([./]*)macros\/common\/' + pImportFilename + '.ftl" as ([a-zA-Z]*)>', 'gi'
     ftlImports = pFileData.match regex
 
     if not ftlImports
-      pFileData = '<#import "' + path.relative(pFilePath, @commonMacrosLinkPath) + '" as ' + pImportFilename + '>\n' + pFileData
+      pFileData = '<#import "' + path.relative(pFilePath, @commonMacrosPaths[pImportFilename]) + '" as ' + pImportFilename + '>\n' + pFileData
 
-    return pFileData
+    pFileData
 
 
   processHref: (pPath) ->
@@ -140,13 +138,126 @@ module.exports = class App
       if err
         console.log 'err:'.red, err
       else
-        btnReg = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/ig
+        btnReg = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/gi
         btns = data.match btnReg
         if btns and btns.length > 0
           data = @detectMacroImport data, pPath, 'button'
 
-          btns.forEach (btn) ->
+          btns.forEach (btn) =>
             console.log '\nbtn', btn
+
+            btnRegex = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/gi
+            btnResult = btnRegex.exec btn
+            btnIndent = btnResult[1]
+            btnContent = btnResult[2]
+            iconData = @getIconData btnContent
+            btnContent = btnContent.replace /<@[^\>]+icon[^\>]+iconPath=['|"]([^'|"]*)['|"][^\>]*>/gi, ''
+            btnContent = btnContent.trim()
+
+            regexOnlyHeadTag = /<button[^\>]*>/ig
+            btnOnlyHeadTag = regexOnlyHeadTag.exec btn
+            btnHeadTag = btnOnlyHeadTag[0]
+
+            btnClass = ''
+            btnType = ''
+
+            attrs = @getAttributes btnHeadTag
+            attrs.forEach (attr) ->
+              if attr.name is 'class' then btnClass = attr.value
+              if attr.name is 'type' then btnType = attr.value
+
+            # Get data attributes
+            regexBtnDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
+            btnDataAttrs = []
+            while ((btnDataAttr = regexBtnDataAttr.exec(btnHeadTag)) isnt null)
+              if btnDataAttr[1] is 'cerberus'
+                btnDataCerberusAttr = btnDataAttr[2]
+              else
+                btnDataAttrs.push
+                  name: btnDataAttr[1]
+                  value: btnDataAttr[2]
+
+            macroButtonData =
+              type: btnType
+              icon: iconData
+              #dataTagco: 'todo'
+              #dataTcevent: 'todo'
+              cerberus: btnDataCerberusAttr
+              dataAttributes: btnDataAttrs
+              disabled: btnHeadTag.indexOf('disabled') isnt -1
+              content: btnContent
+              indent: btnIndent
+
+            result = @manageButtonDataFromClass 'ka', btnClass, macroButtonData
+            #console.log 'ka result', result
+            btnClass = result.btnClass
+            macroButtonData = result.macroButtonData
+
+            result = @manageButtonDataFromClass 'mc', btnClass, macroButtonData
+            console.log 'mc result', result
+            btnClass = result.btnClass
+            macroButtonData = result.macroButtonData
+
+            macroButtonData.cssClass = btnClass.trim()
+
+            data = @replaceButtonWithMacro pPath, data, btn, macroButtonData
+
+          @writeDataInFile pPath, data
+
+
+  manageButtonDataFromClass: (prefix, btnClass, macroButtonData) ->
+    if btnClass.indexOf(prefix + '-button--s') isnt -1
+      macroButtonData.size = 's'
+
+    if btnClass.indexOf(prefix + '-button--m') isnt -1
+      macroButtonData.size = 'm'
+
+    if btnClass.indexOf(prefix + '-button--l') isnt -1
+      macroButtonData.size = 'l'
+
+    if btnClass.indexOf('button--bordered') isnt -1
+      macroButtonData.style = 'bordered'
+
+    if btnClass.indexOf('button--solid') isnt -1
+      macroButtonData.style = 'solid'
+
+    if btnClass.indexOf('primary-02') isnt -1
+      macroButtonData.color = 'primary-02'
+
+    if btnClass.indexOf('danger') isnt -1
+      macroButtonData.color = 'danger'
+
+    if btnClass.indexOf('neutral') isnt -1
+      macroButtonData.color = 'neutral'
+
+    if btnClass.indexOf('icon-only') isnt -1
+      if macroButtonData.icon
+        macroButtonData.icon.iconOnly = yes
+
+    # ka-button--secondary
+    # ka-button--campus
+    # ka-button--grey
+
+    if btnClass.indexOf(prefix + '-button--full') isnt -1
+      macroButtonData.width = 'full'
+
+    if btnClass.indexOf(prefix + '-link') isnt -1
+      macroButtonData.displayStyle = 'link'
+
+      if btnClass.indexOf(prefix + '-link--s') isnt -1
+        macroButtonData.size = 's'
+
+      replaceLinkRegex = new RegExp prefix + '-link[-]{0,2}[a-z0-9-]*', 'gi'
+      btnClass = btnClass.replace replaceLinkRegex, ''
+
+    replaceRegex = new RegExp prefix + '-button[-]{0,2}[a-z0-9-]*', 'gi'
+    btnClass = btnClass.replace replaceRegex, ''
+
+    objToReturn =
+      btnClass: btnClass
+      macroButtonData: macroButtonData
+
+    objToReturn
 
 
   getAttributes: (pHeadTagStr) ->
@@ -189,12 +300,45 @@ module.exports = class App
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
     if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0
       linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
-    linkConfigStr = linkConfigStr.substring 0, linkConfigStr.length - 2
-    linkConfigStr += '\n'
+
+    if linkConfigStr.charAt(linkConfigStr.length - 2) is ','
+      linkConfigStr = linkConfigStr.substring 0, linkConfigStr.length - 2
+      linkConfigStr += '\n'
     linkConfigStr += pLinkData.indent + '} >\n'
     linkConfigStr += pLinkData.indent + '<@link.linkMozaic ' + configName + '>' + pLinkData.content + '</@link.linkMozaic>'
 
     pFileData = pFileData.replace pLinkSrc, linkConfigStr
+
+    pFileData
+
+
+  replaceButtonWithMacro: (pPath, pFileData, pButtonSrc, pButtonData) ->
+    lastPathName = @keepLastWord pPath
+    lastPathName = lastPathName.replace /[^a-z0-9]*/gi, ''
+    configName = lastPathName + @macroButtonConfigCount + 'ButtonConfig'
+    @macroButtonConfigCount++
+
+    linkConfigStr = pButtonData.indent + '<#assign ' + configName + ' = {\n'
+    if pButtonData.type then linkConfigStr += '' + pButtonData.indent + '    "type": "' + pButtonData.type + '",\n'
+    if pButtonData.color then linkConfigStr += '' + pButtonData.indent + '    "color": "' + pButtonData.color + '",\n'
+    if pButtonData.style then linkConfigStr += '' + pButtonData.indent + '    "style": "' + pButtonData.style + '",\n'
+    if pButtonData.displayStyle then linkConfigStr += '' + pButtonData.indent + '    "displayStyle": "' + pButtonData.displayStyle + '",\n'
+    if pButtonData.size then linkConfigStr += '' + pButtonData.indent + '    "size": "' + pButtonData.size + '",\n'
+    if pButtonData.disabled then linkConfigStr += '' + pButtonData.indent + '    "disabled": true,\n'
+    if pButtonData.width then linkConfigStr += '' + pButtonData.indent + '    "width": "' + pButtonData.width + '",\n'
+    if pButtonData.icon and Object.keys(pButtonData.icon).length > 0 then linkConfigStr += '' + pButtonData.indent + '    "icon": ' + JSON.stringify(pButtonData.icon) + ',\n'
+    if pButtonData.cssClass then linkConfigStr += '' + pButtonData.indent + '    "cssClass": "' + pButtonData.cssClass + '",\n'
+    if pButtonData.cerberus then linkConfigStr += '' + pButtonData.indent + '    "cerberus": "' + pButtonData.cerberus + '",\n'
+    if pButtonData.dataAttributes and pButtonData.dataAttributes.length > 0
+      linkConfigStr += '' + pButtonData.indent + '    "dataAttributes": ' + JSON.stringify(pButtonData.dataAttributes) + ',\n'
+
+    if linkConfigStr.charAt(linkConfigStr.length - 2) is ','
+      linkConfigStr = linkConfigStr.substring 0, linkConfigStr.length - 2
+      linkConfigStr += '\n'
+    linkConfigStr += pButtonData.indent + '} >\n'
+    linkConfigStr += pButtonData.indent + '<@button.buttonMozaic ' + configName + '>' + pButtonData.content + '</@button.buttonMozaic>'
+
+    pFileData = pFileData.replace pButtonSrc, linkConfigStr
 
     pFileData
 

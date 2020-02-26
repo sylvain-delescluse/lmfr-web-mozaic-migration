@@ -10,6 +10,8 @@ module.exports = class App
   commonMacrosLinkPath: undefined
   commonMacrosButtonPath: undefined
 
+  macroLinkConfigCount: 0
+
   constructor: ->
     console.log "process.cwd()".cyan, process.cwd()
 
@@ -114,7 +116,6 @@ module.exports = class App
     lastPathNameExt = pathArr[pathArr.length - 1]
     lastPathNameArr = lastPathNameExt.split '.'
     lastPathName = String(lastPathNameArr[0]).toLowerCase()
-    lastPathName += Math.floor Math.random() * 100
     lastPathName
 
 
@@ -125,7 +126,8 @@ module.exports = class App
       lastPathName += @keepLastWord pLinkData.href
 
     lastPathName = lastPathName.replace /[^a-z0-9]*/gi, ''
-    configName = lastPathName + 'LinkConfig'
+    configName = lastPathName + @macroLinkConfigCount + 'LinkConfig'
+    @macroLinkConfigCount++
 
     linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
@@ -133,7 +135,8 @@ module.exports = class App
     if pLinkData.icon and Object.keys(pLinkData.icon).length > 0 then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
     if pLinkData.cssClass then linkConfigStr += '' + pLinkData.indent + '    "cssClass": "' + pLinkData.cssClass + '",\n'
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
-    if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0 then linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
+    if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0
+      linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
     linkConfigStr = linkConfigStr.substring 0, linkConfigStr.length - 2
     linkConfigStr += '\n'
     linkConfigStr += pLinkData.indent + '} >\n'

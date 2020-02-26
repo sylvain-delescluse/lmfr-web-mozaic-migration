@@ -51,7 +51,10 @@ You can use gulp too :
 gulp
 ```
 This command will watch the coffee file.
-
+Maybe you will need to install "gulp" globally with :
+```
+npm install -g gulp
+```
 
 Test the app on local test files :
 ```

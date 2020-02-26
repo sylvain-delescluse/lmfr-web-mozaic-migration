@@ -52,27 +52,27 @@ module.exports = class App
           ahrefs.forEach (ahref) =>
             console.log '\nahref', ahref
 
-            # Get Class
-            regexLinkClass = new RegExp '([ \t]*)<a[^\>]+class=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
-            ahrefClassResult = regexLinkClass.exec ahref
-            ahrefIndent = ahrefClassResult[1]
-            #console.log 'ahrefIndent', ahrefIndent
-            ahrefClass = ahrefClassResult[2]
-            #console.log 'ahrefClass', ahrefClass
-
-            # Get href
-            regexLinkHref = new RegExp '([ \t]*)<a[^\>]+href=[\'|"]([^\'|"]*)[\'|"][^\>]*>([\\w\\W]*?)<\\/a>', 'gi'
-            ahrefHrefResult = regexLinkHref.exec ahref
-            ahrefHref = ahrefHrefResult[2]
-            #console.log 'ahrefHref', ahrefHref
-            ahrefContent = ahrefHrefResult[3]
-            #console.log 'ahrefContent', ahrefContent
+            regLink = /([ \t]*)<a[^\>]+>([\w\W]*?)<\/a>/gi
+            ahrefResult = regLink.exec ahref
+            ahrefIndent = ahrefResult[1]
+            ahrefContent = ahrefResult[2]
             iconData = @getIconData ahrefContent
-            #console.log 'iconData', iconData
+            ahrefContent = ahrefContent.replace /<@[^\>]+icon[^\>]+iconPath=['|"]([^'|"]*)['|"][^\>]*>/gi, ''
+            ahrefContent = ahrefContent.trim()
 
             regexOnlyHeadTag = /<a[^\>]*>/ig
             ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
             ahrefHeadTag = ahrefOnlyHeadTag[0]
+
+            ahrefClass = ''
+            ahrefHref = ''
+            ahrefTarget = '_self'
+
+            attrs = @getAttributes ahrefHeadTag
+            attrs.forEach (attr) ->
+              if attr.name is 'class' then ahrefClass = attr.value
+              if attr.name is 'href' then ahrefHref = attr.value
+              if attr.name is 'target' then ahrefTarget = attr.value
 
             # Get data attributes
             regexLinkDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
@@ -84,8 +84,6 @@ module.exports = class App
                 linkDataAttrs.push
                   name: linkDataAttr[1]
                   value: linkDataAttr[2]
-            #console.log 'linkDataAttrs:'.cyan, linkDataAttrs
-            #console.log 'ahrefDataCerberusAttr:'.cyan, ahrefDataCerberusAttr
 
             macroLinkData =
               href: ahrefHref
@@ -94,7 +92,7 @@ module.exports = class App
               #dataTcevent: 'todo'
               cerberus: ahrefDataCerberusAttr
               dataAttributes: linkDataAttrs
-
+              target: ahrefTarget
               content: ahrefContent
               indent: ahrefIndent
 
@@ -109,6 +107,18 @@ module.exports = class App
             data = @replaceLinkWithMacro pPath, data, ahref, macroLinkData
 
           @writeDataInFile pPath, data
+
+
+  getAttributes: (pHeadTagStr) ->
+    # Get all attributes in tag head
+    regexAttr = /([\w-]+)=['|"]([^'|"]*)['|"]/ig
+    attrs = []
+    while ((linkAttr = regexAttr.exec(pHeadTagStr)) isnt null)
+      attrs.push
+        name: linkAttr[1]
+        value: linkAttr[2]
+
+    attrs
 
 
   keepLastWord: (pPath) ->
@@ -132,6 +142,8 @@ module.exports = class App
     linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
     if pLinkData.size then linkConfigStr += '' + pLinkData.indent + '    "size": "' + pLinkData.size + '",\n'
+    if pLinkData.target and pLinkData.target is '_blank'
+      linkConfigStr += '' + pLinkData.indent + '    "targetBlank": true,\n'
     if pLinkData.icon and Object.keys(pLinkData.icon).length > 0 then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
     if pLinkData.cssClass then linkConfigStr += '' + pLinkData.indent + '    "cssClass": "' + pLinkData.cssClass + '",\n'
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
@@ -217,8 +229,8 @@ module.exports = class App
     console.log ('Overwrite ' + pPath + ' file !!!').yellow
     deferred = q.defer()
 
-    relative = path.relative process.cwd(), pPath
-    console.log (' relative path:').blue, relative
+    #relative = path.relative process.cwd(), pPath
+    #console.log (' relative path:').blue, relative
 
     try
       fs.writeFile pPath, pData, 'utf8', (err, data) ->

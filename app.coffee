@@ -78,7 +78,7 @@ module.exports = class App
 
 
   processHref: (pPath) ->
-    console.log ('\nLook for <a > in ' + pPath + '').blue
+    console.log ('Look for <a > in ' + pPath + '').blue
     fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
@@ -89,7 +89,7 @@ module.exports = class App
           data = @detectMacroImport data, pPath, 'link'
 
           ahrefs.forEach (ahref) =>
-            console.log '\nahref', ahref
+            #console.log '\nahref', ahref
 
             regLink = /([ \t]*)<a[^\>]+>([\w\W]*?)<\/a>/gi
             ahrefResult = regLink.exec ahref
@@ -135,11 +135,9 @@ module.exports = class App
               content: ahrefContent
               indent: ahrefIndent
 
-            if ahrefClass.indexOf('ka-link--s') isnt -1
-              macroLinkData.size = 's'
-
-            ahrefClass = ahrefClass.replace 'ka-link--s', ''
-            ahrefClass = ahrefClass.replace 'ka-link', ''
+            result = @manageLinkDataFromClass ahrefClass, macroLinkData
+            ahrefClass = result.linkClass
+            macroLinkData = result.macroData
 
             macroLinkData.cssClass = ahrefClass.trim()
 
@@ -148,8 +146,51 @@ module.exports = class App
           @writeDataInFile pPath, data
 
 
+  manageLinkDataFromClass: (linkClass, macroData) ->
+
+    if linkClass.indexOf('-link--s') isnt -1
+      macroData.size = 's'
+
+    if linkClass.indexOf('-link--m') isnt -1
+      macroData.size = 'm'
+
+    if linkClass.indexOf('light') isnt -1
+      macroData.color = 'light'
+
+    if linkClass.indexOf('primary') isnt -1
+      macroData.color = 'primary'
+
+    if linkClass.indexOf('primary-02') isnt -1
+      macroData.color = 'primary-02'
+
+    if linkClass.indexOf('danger') isnt -1
+      macroData.color = 'danger'
+
+    if linkClass.indexOf('icon-only') isnt -1
+      if macroData.icon
+        macroData.icon.iconOnly = yes
+
+    if linkClass.indexOf('-button') isnt -1
+      macroData.displayStyle = 'button'
+
+      if linkClass.indexOf('-button--s') isnt -1
+        macroData.size = 's'
+
+      replaceButtonRegex = new RegExp '(ka|mc)-button[-]{0,2}[a-z0-9-]*', 'gi'
+      linkClass = linkClass.replace replaceButtonRegex, ''
+
+    replaceLinkRegex = new RegExp '(ka|mc)-link[-]{0,2}[a-z0-9-]*', 'gi'
+    linkClass = linkClass.replace replaceLinkRegex, ''
+
+    objToReturn =
+      linkClass: linkClass
+      macroData: macroData
+
+    objToReturn
+
+
   processButton: (pPath) ->
-    console.log ('\nLook for <button > in ' + pPath + '').blue
+    console.log ('Look for <button > in ' + pPath + '').blue
     fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
@@ -160,7 +201,7 @@ module.exports = class App
           data = @detectMacroImport data, pPath, 'button'
 
           btns.forEach (btn) =>
-            console.log '\nbtn', btn
+            #console.log '\nbtn', btn
 
             btnRegex = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/gi
             btnResult = btnRegex.exec btn
@@ -204,13 +245,8 @@ module.exports = class App
               content: btnContent
               indent: btnIndent
 
-            result = @manageButtonDataFromClass 'ka', btnClass, macroButtonData
-            #console.log 'ka result', result
-            btnClass = result.btnClass
-            macroButtonData = result.macroButtonData
-
-            result = @manageButtonDataFromClass 'mc', btnClass, macroButtonData
-            console.log 'mc result', result
+            result = @manageButtonDataFromClass btnClass, macroButtonData
+            #console.log 'manageButtonDataFromClass result', result
             btnClass = result.btnClass
             macroButtonData = result.macroButtonData
 
@@ -221,52 +257,48 @@ module.exports = class App
           @writeDataInFile pPath, data
 
 
-  manageButtonDataFromClass: (prefix, btnClass, macroButtonData) ->
-    if btnClass.indexOf(prefix + '-button--s') isnt -1
+  manageButtonDataFromClass: (btnClass, macroButtonData) ->
+    if btnClass.indexOf('-button--s') isnt -1
       macroButtonData.size = 's'
 
-    if btnClass.indexOf(prefix + '-button--m') isnt -1
+    if btnClass.indexOf('-button--m') isnt -1
       macroButtonData.size = 'm'
 
-    if btnClass.indexOf(prefix + '-button--l') isnt -1
+    if btnClass.indexOf('-button--l') isnt -1
       macroButtonData.size = 'l'
 
-    if btnClass.indexOf('button--bordered') isnt -1
+    if btnClass.indexOf('button--bordered') isnt -1 or btnClass.indexOf('--secondary') isnt -1
       macroButtonData.style = 'bordered'
 
     if btnClass.indexOf('button--solid') isnt -1
       macroButtonData.style = 'solid'
 
-    if btnClass.indexOf('primary-02') isnt -1
+    if btnClass.indexOf('primary-02') isnt -1 or btnClass.indexOf('--campus') isnt -1
       macroButtonData.color = 'primary-02'
 
     if btnClass.indexOf('danger') isnt -1
       macroButtonData.color = 'danger'
 
-    if btnClass.indexOf('neutral') isnt -1
+    if btnClass.indexOf('neutral') isnt -1 or btnClass.indexOf('--grey') isnt -1
       macroButtonData.color = 'neutral'
 
     if btnClass.indexOf('icon-only') isnt -1
       if macroButtonData.icon
         macroButtonData.icon.iconOnly = yes
 
-    # ka-button--secondary
-    # ka-button--campus
-    # ka-button--grey
-
-    if btnClass.indexOf(prefix + '-button--full') isnt -1
+    if btnClass.indexOf('-button--full') isnt -1
       macroButtonData.width = 'full'
 
-    if btnClass.indexOf(prefix + '-link') isnt -1
+    if btnClass.indexOf('-link') isnt -1
       macroButtonData.displayStyle = 'link'
 
-      if btnClass.indexOf(prefix + '-link--s') isnt -1
+      if btnClass.indexOf('-link--s') isnt -1
         macroButtonData.size = 's'
 
-      replaceLinkRegex = new RegExp prefix + '-link[-]{0,2}[a-z0-9-]*', 'gi'
+      replaceLinkRegex = new RegExp '(ka|mc)-link[-]{0,2}[a-z0-9-]*', 'gi'
       btnClass = btnClass.replace replaceLinkRegex, ''
 
-    replaceRegex = new RegExp prefix + '-button[-]{0,2}[a-z0-9-]*', 'gi'
+    replaceRegex = new RegExp '(ka|mc)-button[-]{0,2}[a-z0-9-]*', 'gi'
     btnClass = btnClass.replace replaceRegex, ''
 
     objToReturn =
@@ -308,6 +340,8 @@ module.exports = class App
 
     linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
+    if pLinkData.color then linkConfigStr += '' + pLinkData.indent + '    "color": "' + pLinkData.color + '",\n'
+    if pLinkData.displayStyle then linkConfigStr += '' + pLinkData.indent + '    "displayStyle": "' + pLinkData.displayStyle + '",\n'
     if pLinkData.size then linkConfigStr += '' + pLinkData.indent + '    "size": "' + pLinkData.size + '",\n'
     if pLinkData.target and pLinkData.target is '_blank'
       linkConfigStr += '' + pLinkData.indent + '    "targetBlank": true,\n'

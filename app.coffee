@@ -76,7 +76,11 @@ module.exports = class App
     ftlImports = pFileData.match regex
 
     if not ftlImports
-      pFileData = '<#import "' + path.relative(pFilePath, @commonMacrosPaths[pImportFilename]) + '" as ' + pImportFilename + '>\n' + pFileData
+      fileToImportPath = path.relative pFilePath, @commonMacrosPaths[pImportFilename]
+      if fileToImportPath.substr(0, 3) is '../'
+        fileToImportPath = fileToImportPath.substr 3, fileToImportPath.length - 1
+
+      pFileData = '<#import "' + fileToImportPath + '" as ' + pImportFilename + '>\n' + pFileData
 
     pFileData
 

@@ -4,6 +4,41 @@
 
 We need to replace links and buttons with new Mosaic freemarker macros.
 
+#### Pour les "Button"
+
+```
+<#--  File to import  -->
+<#import "../../macros/common/button.ftl" as button>
+
+<#--  The Button macro  -->
+<#assign buttonConfig = {
+    "color": "primary-02",
+    "size": "s"
+}/>
+<@button.buttonMozaic buttonConfig >Button text</@button.buttonMozaic>
+```
+
+Le lien vers la doc. du socle pour les boutons :
+https://adeo.github.io/integration-web-core--socle/Components/buttons/freemarker/
+
+#### Pour les "Link"
+
+```
+<#--  File to import  -->
+<#import "../../macros/common/link.ftl" as link>
+
+<#--  The Link macro  -->
+<#assign linkConfig = {
+    "href": "/my-component",
+    "color": "primary-02"
+}/>
+<@link.linkMozaic linkConfig >Link text</@link.linkMozaic>
+```
+
+Le lien vers la doc. du socle pour les liens :
+https://adeo.github.io/integration-web-core--socle/Components/links/freemarker/
+
+
 ### Installation
 
 First, clone this repository.

@@ -38,7 +38,7 @@ After the symlink done, go in the target directory and do :
 ```
 lm-mosaic
 ```
-
+A prompt will ask you to choose the "link" or "button" and the extension "ftl" or "ftlh".
 
 ### Build / Dev
 

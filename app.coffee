@@ -18,37 +18,47 @@ module.exports = class App
 
 
   startPrompt: ->
-    console.log 'Please choose the processus ("link" or "button")'.blue.bold
+    console.log '1. Please choose the processus ("link" or "button")'.blue.bold
+    console.log '2. Please choose the extension ("ftl" or "ftlh")'.blue.bold
     prompt.start()
 
     promptSchema =
       properties:
         type:
-          pattern: /^[a-z]+$/
-          message: 'Source must be only letters'
+          pattern: /^(link|button)$/
+          message: 'Type must be "link" or "button"'
           required: true
           default: 'button'
+        extension:
+          pattern: /^(ftl|ftlh)$/
+          message: 'Extension must be "ftl" or "ftlh"'
+          required: true
+          default: 'ftl'
 
     prompt.get promptSchema, (err, result) =>
       if err
         console.log "error:".red, err
       else
         console.log 'You\'ve choosen the type:', (result.type).cyan
-        @startExploration result.type
+        console.log 'You\'ve choosen the extension:', (result.extension).cyan
+        @startExploration result.type, result.extension
 
 
-  startExploration: (pType) ->
-    @getFilesByExt('ftl', process.cwd(), yes).then (ftlFiles) =>
+  startExploration: (pType, pExt = 'ftl') ->
+    @getFilesByExt(pExt, process.cwd(), yes).then (ftlFiles) =>
 
-      for filePath in ftlFiles
-        if filePath.indexOf('templates/macros/common') isnt -1
-          if filePath.indexOf('templates/macros/common/' + pType + '.ftl') isnt -1
-            @commonMacrosPaths[pType] = filePath
-        else
-          if pType is 'link'
-            @processHref filePath
-          if pType is 'button'
-            @processButton filePath
+      if ftlFiles and ftlFiles.length > 0
+        for filePath in ftlFiles
+          if filePath.indexOf('templates/macros/common') isnt -1
+            if filePath.indexOf('templates/macros/common/' + pType + '.ftl') isnt -1
+              @commonMacrosPaths[pType] = filePath
+          else
+            if pType is 'link'
+              @processHref filePath
+            if pType is 'button'
+              @processButton filePath
+      else
+        console.log ('No "' + pExt + '" files found!').red
 
 
   detectMacroImport: (pFileData, pFilePath, pImportFilename) ->

@@ -82,6 +82,7 @@ lm-mosaic
 ```
 
 A prompt will ask you to choose the "link" or "button" and the extension "ftl" or "ftlh".
+
 4. Check all the updated files, and the result on your "dev" env.
 
 5. Git Commit, Push, etc.

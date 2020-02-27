@@ -2,7 +2,7 @@ colors = require 'colors'
 prompt = require 'prompt'
 fs = require 'fs'
 q = require 'q'
-commandLineArgs = require 'command-line-args'
+#commandLineArgs = require 'command-line-args'
 path = require 'path'
 
 module.exports = class App
@@ -13,8 +13,12 @@ module.exports = class App
   macroButtonConfigCount: 0
 
   constructor: ->
-    console.log "process.cwd()".cyan, process.cwd()
-    @startPrompt()
+    #console.log "process.cwd()".cyan, process.cwd()
+
+    @checkPackageVersion().then (socleVersion) =>
+      console.log 'Version de "integration-web-core--socle":'.cyan, (socleVersion).bold.cyan
+
+      @startPrompt()
 
 
   startPrompt: ->
@@ -437,6 +441,20 @@ module.exports = class App
     catch error
       console.log 'catch error'.red, error
       deferred.reject error
+
+    deferred.promise
+
+
+  checkPackageVersion: () ->
+    deferred = q.defer()
+
+    fs.readFile './package.json', 'utf8', (err, data) ->
+      socleRegex = /["|']integration-web-core--socle["|'][ ]*:[ ]*["|'][^#]*#([0-9v.]*)["|']/gi
+      packageSocleResult = socleRegex.exec data
+      if not packageSocleResult
+        deferred.resolve null
+      else
+        deferred.resolve packageSocleResult[1]
 
     deferred.promise
 

@@ -148,32 +148,32 @@ module.exports = class App
 
   manageLinkDataFromClass: (linkClass, macroData) ->
 
-    if linkClass.indexOf('-link--s') isnt -1
+    if linkClass.match /(ka|mc)-link--s["|'| ]/gi
       macroData.size = 's'
 
-    if linkClass.indexOf('-link--m') isnt -1
+    if linkClass.match /(ka|mc)-link--m["|'| ]/gi
       macroData.size = 'm'
 
-    if linkClass.indexOf('light') isnt -1
+    if linkClass.indexOf('link--light') isnt -1
       macroData.color = 'light'
 
-    if linkClass.indexOf('primary') isnt -1
+    if linkClass.indexOf('link--primary') isnt -1
       macroData.color = 'primary'
 
-    if linkClass.indexOf('primary-02') isnt -1
+    if linkClass.indexOf('link--primary-02') isnt -1
       macroData.color = 'primary-02'
 
-    if linkClass.indexOf('danger') isnt -1
+    if linkClass.indexOf('link--danger') isnt -1
       macroData.color = 'danger'
 
     if linkClass.indexOf('icon-only') isnt -1
       if macroData.icon
         macroData.icon.iconOnly = yes
 
-    if linkClass.indexOf('-button') isnt -1
+    if linkClass.indexOf('ka-button') isnt -1 or linkClass.indexOf('mc-button') isnt -1
       macroData.displayStyle = 'button'
 
-      if linkClass.indexOf('-button--s') isnt -1
+      if linkClass.match /(ka|mc)-button--s["|'| ]/gi
         macroData.size = 's'
 
       replaceButtonRegex = new RegExp '(ka|mc)-button[-]{0,2}[a-z0-9-]*', 'gi'
@@ -258,41 +258,42 @@ module.exports = class App
 
 
   manageButtonDataFromClass: (btnClass, macroButtonData) ->
-    if btnClass.indexOf('-button--s') isnt -1
+
+    if btnClass.match /(ka|mc)-button--s["|'| ]/gi
       macroButtonData.size = 's'
 
-    if btnClass.indexOf('-button--m') isnt -1
+    if btnClass.match /(ka|mc)-button--m["|'| ]/gi
       macroButtonData.size = 'm'
 
-    if btnClass.indexOf('-button--l') isnt -1
+    if btnClass.match /(ka|mc)-button--l["|'| ]/gi
       macroButtonData.size = 'l'
 
-    if btnClass.indexOf('button--bordered') isnt -1 or btnClass.indexOf('--secondary') isnt -1
+    if btnClass.indexOf('button--bordered') isnt -1 or btnClass.indexOf('button--secondary') isnt -1
       macroButtonData.style = 'bordered'
 
     if btnClass.indexOf('button--solid') isnt -1
       macroButtonData.style = 'solid'
 
-    if btnClass.indexOf('primary-02') isnt -1 or btnClass.indexOf('--campus') isnt -1
+    if btnClass.indexOf('button--solid-primary-02') isnt -1 or btnClass.indexOf('button--bordered-primary-02') isnt -1 or btnClass.indexOf('button--campus') isnt -1
       macroButtonData.color = 'primary-02'
 
-    if btnClass.indexOf('danger') isnt -1
+    if btnClass.indexOf('button--solid-danger') isnt -1 or btnClass.indexOf('button--bordered-danger') isnt -1
       macroButtonData.color = 'danger'
 
-    if btnClass.indexOf('neutral') isnt -1 or btnClass.indexOf('--grey') isnt -1
+    if btnClass.indexOf('button--solid-neutral') isnt -1 or btnClass.indexOf('button--bordered-neutral') isnt -1 or btnClass.indexOf('button--grey') isnt -1
       macroButtonData.color = 'neutral'
 
-    if btnClass.indexOf('icon-only') isnt -1
+    if btnClass.indexOf('button--icon-only') isnt -1
       if macroButtonData.icon
         macroButtonData.icon.iconOnly = yes
 
     if btnClass.indexOf('-button--full') isnt -1
       macroButtonData.width = 'full'
 
-    if btnClass.indexOf('-link') isnt -1
+    if btnClass.indexOf('ka-link') isnt -1 or btnClass.indexOf('mc-link') isnt -1
       macroButtonData.displayStyle = 'link'
 
-      if btnClass.indexOf('-link--s') isnt -1
+      if btnClass.match /(ka|mc)-link--s["|'| ]/gi
         macroButtonData.size = 's'
 
       replaceLinkRegex = new RegExp '(ka|mc)-link[-]{0,2}[a-z0-9-]*', 'gi'
@@ -335,6 +336,7 @@ module.exports = class App
       lastPathName += @keepLastWord pLinkData.href
 
     lastPathName = lastPathName.replace /[^a-z0-9]*/gi, ''
+    lastPathName = lastPathName.substring 0, 15
     configName = lastPathName + @macroLinkConfigCount + 'LinkConfig'
     @macroLinkConfigCount++
 
@@ -365,6 +367,7 @@ module.exports = class App
   replaceButtonWithMacro: (pPath, pFileData, pButtonSrc, pButtonData) ->
     lastPathName = @keepLastWord pPath
     lastPathName = lastPathName.replace /[^a-z0-9]*/gi, ''
+    lastPathName = lastPathName.substring 0, 15
     configName = lastPathName + @macroButtonConfigCount + 'ButtonConfig'
     @macroButtonConfigCount++
 
@@ -443,7 +446,7 @@ module.exports = class App
       directories.forEach (dir) =>
         dirPath = pDir + '/' + dir
 
-        if dirPath.indexOf('node_modules') is -1 and dirPath.indexOf('git') is -1
+        if dirPath.indexOf('node_modules') is -1 and dirPath.indexOf('git') is -1 and dirPath.indexOf('target') is -1
           p = @getFilesByExt pExt, dirPath, pWithUnderscore
           promises.push p
 

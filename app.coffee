@@ -17,8 +17,9 @@ module.exports = class App
 
     @checkPackageVersion().then (socleVersion) =>
       console.log 'Version de "integration-web-core--socle":'.cyan, (socleVersion).bold.cyan
-
       @startPrompt()
+    , (err) ->
+      console.log 'You probably are not in the good directory!'.red.cyan
 
 
   startPrompt: ->
@@ -448,13 +449,18 @@ module.exports = class App
   checkPackageVersion: () ->
     deferred = q.defer()
 
-    fs.readFile './package.json', 'utf8', (err, data) ->
-      socleRegex = /["|']integration-web-core--socle["|'][ ]*:[ ]*["|'][^#]*#([0-9v.]*)["|']/gi
-      packageSocleResult = socleRegex.exec data
-      if not packageSocleResult
-        deferred.resolve null
+    packageFilePath = './package.json'
+    fs.readFile packageFilePath, 'utf8', (err, data) ->
+      if err
+        console.log ('Error to read ' + packageFilePath).red, err
+        deferred.reject err
       else
-        deferred.resolve packageSocleResult[1]
+        socleRegex = /["|']integration-web-core--socle["|'][ ]*:[ ]*["|'][^#]*#([0-9v.]*)["|']/gi
+        packageSocleResult = socleRegex.exec data
+        if not packageSocleResult
+          deferred.resolve null
+        else
+          deferred.resolve packageSocleResult[1]
 
     deferred.promise
 

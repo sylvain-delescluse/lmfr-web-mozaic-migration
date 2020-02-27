@@ -1,8 +1,8 @@
-# LMFR tool for Mosaic migration
+# LMFR tool for Mozaic migration
 
 ## Introduction
 
-We need to replace links and buttons with new Mosaic freemarker macros.
+We need to replace links and buttons with new Mozaic freemarker macros.
 
 ### For "Button"
 
@@ -64,7 +64,7 @@ To prepare symlink, do :
 npm link
 ```
 
-Now you can directly use "lm-mosaic" command from the other project
+Now you can directly use "lm-mozaic" command from the other project
 
 ## Step 3 : Launch
 
@@ -78,7 +78,7 @@ After the symlink done, go in a Kobi module directory.
 3. Launch the script :
 
 ```
-lm-mosaic
+lm-mozaic
 ```
 
 A prompt will ask you to choose the "link" or "button" and the extension "ftl" or "ftlh".

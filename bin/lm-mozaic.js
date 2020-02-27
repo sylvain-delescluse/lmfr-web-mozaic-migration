@@ -2,4 +2,4 @@
 
 'use strict';
 
-var lmmosaic = require('../app');
+var lmmozaic = require('../app');

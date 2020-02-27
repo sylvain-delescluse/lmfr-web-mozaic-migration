@@ -55,14 +55,18 @@ module.exports = class App
 
       if ftlFiles and ftlFiles.length > 0
         for filePath in ftlFiles
-          if filePath.indexOf('templates/macros/common') isnt -1
-            if filePath.indexOf('templates/macros/common/' + pType + '.ftl') isnt -1
-              @commonMacrosPaths[pType] = filePath
-          else
-            if pType is 'link'
-              @processHref filePath
-            if pType is 'button'
-              @processButton filePath
+          if filePath.indexOf('templates/macros/common/' + pType + '.ftl') isnt -1
+            @commonMacrosPaths[pType] = filePath
+
+        if Object.keys(@commonMacrosPaths).length > 0
+          for filePath in ftlFiles
+            if filePath.indexOf('templates/components') isnt -1
+              if pType is 'link'
+                @processHref filePath
+              if pType is 'button'
+                @processButton filePath
+        else
+          console.log ('File "templates/macros/common/' + pType + '.ftl" not found! Please upgrade "integration-web-core--socle"').red
       else
         console.log ('No "' + pExt + '" files found!').red
 

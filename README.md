@@ -1,10 +1,10 @@
 # LMFR tool for Mosaic migration
 
-### Introduction
+## Introduction
 
 We need to replace links and buttons with new Mosaic freemarker macros.
 
-#### Pour les "Button"
+### For "Button"
 
 ```
 <#--  File to import  -->
@@ -18,10 +18,10 @@ We need to replace links and buttons with new Mosaic freemarker macros.
 <@button.buttonMozaic buttonConfig >Button text</@button.buttonMozaic>
 ```
 
-Le lien vers la doc. du socle pour les boutons :
+Button documentation :
 https://adeo.github.io/integration-web-core--socle/Components/buttons/freemarker/
 
-#### Pour les "Link"
+### For "Link"
 
 ```
 <#--  File to import  -->
@@ -35,47 +35,58 @@ https://adeo.github.io/integration-web-core--socle/Components/buttons/freemarker
 <@link.linkMozaic linkConfig >Link text</@link.linkMozaic>
 ```
 
-Le lien vers la doc. du socle pour les liens :
+Link documentation :
 https://adeo.github.io/integration-web-core--socle/Components/links/freemarker/
 
 
-### Installation
+## Installation
 
-First, clone this repository.
 
-#### Requirements
+### Requirements
 
 You need to have NodeJS
 
 https://nodejs.org/fr/
 
 
-#### Step 1 : Install dependencies
+### Step 1 : Install
 
+Clone this repository.
 Go in this directory and install required node packages
 ```
 npm install
 ```
 
-#### Step 2 : Symlink
+### Step 2 : Symlink
 
 To prepare symlink, do :
 ```
-sudo npm link
+npm link
 ```
 
 Now you can directly use "lm-mosaic" command from the other project
 
+## Step 3 : Launch
 
-#### Step 3 : Use
+After the symlink done, go in a Kobi module directory.
 
-After the symlink done, go in the target directory and do :
+1. Check your "socle" version and upgrade if needed.
+(Remove node_modules and src/main/resources/templates/macros directories)
+
+2. Why not do a new branch and clean your project.
+
+3. Launch the script :
+
 ```
 lm-mosaic
 ```
-A prompt will ask you to choose the "link" or "button" and the extension "ftl" or "ftlh".
 
-### Build / Dev
+A prompt will ask you to choose the "link" or "button" and the extension "ftl" or "ftlh".
+4. Check all the updated files, and the result on your "dev" env.
+
+5. Git Commit, Push, etc.
+
+## Build / Dev
 
 To generate the js file from the coffee file :
 ```

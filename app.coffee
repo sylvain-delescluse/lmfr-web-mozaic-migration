@@ -433,7 +433,8 @@ module.exports = class App
       if iconRightTextLength > 0
         retData.side = 'left'
 
-      retData.iconOnly = (iconLeftTextLength is 0 and iconRightTextLength is 0)
+      if iconLeftTextLength is 0 and iconRightTextLength is 0
+        retData.iconOnly = yes
 
     retData
 

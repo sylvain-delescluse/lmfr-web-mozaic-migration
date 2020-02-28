@@ -158,11 +158,10 @@ module.exports = class App
 
 
   manageLinkDataFromClass: (linkClass, macroData) ->
-
-    if linkClass.match /(ka|mc)-link--s["|'| ]/gi
+    if linkClass.match /(ka|mc)-link--s(?!\w)/gi
       macroData.size = 's'
 
-    if linkClass.match /(ka|mc)-link--m["|'| ]/gi
+    if linkClass.match /(ka|mc)-link--m(?!\w)/gi
       macroData.size = 'm'
 
     if linkClass.indexOf('link--light') isnt -1
@@ -184,11 +183,9 @@ module.exports = class App
     if linkClass.indexOf('ka-button') isnt -1 or linkClass.indexOf('mc-button') isnt -1
       macroData.displayStyle = 'button'
 
-      if linkClass.match /(ka|mc)-button--s["|'| ]/gi
-        macroData.size = 's'
-
-      replaceButtonRegex = new RegExp '(ka|mc)-button[-]{0,2}[a-z0-9-]*', 'gi'
-      linkClass = linkClass.replace replaceButtonRegex, ''
+      result = @manageButtonDataFromClass linkClass, macroData
+      linkClass = result.btnClass
+      macroData = result.macroButtonData
 
     replaceLinkRegex = new RegExp '(ka|mc)-link[-]{0,2}[a-z0-9-]*', 'gi'
     linkClass = linkClass.replace replaceLinkRegex, ''
@@ -272,13 +269,13 @@ module.exports = class App
 
   manageButtonDataFromClass: (btnClass, macroButtonData) ->
 
-    if btnClass.match /(ka|mc)-button--s["|'| ]/gi
+    if btnClass.match /(ka|mc)-button--s(?!\w)/gi
       macroButtonData.size = 's'
 
-    if btnClass.match /(ka|mc)-button--m["|'| ]/gi
+    if btnClass.match /(ka|mc)-button--m(?!\w)/gi
       macroButtonData.size = 'm'
 
-    if btnClass.match /(ka|mc)-button--l["|'| ]/gi
+    if btnClass.match /(ka|mc)-button--l(?!\w)/gi
       macroButtonData.size = 'l'
 
     if btnClass.indexOf('button--bordered') isnt -1 or btnClass.indexOf('button--secondary') isnt -1
@@ -306,11 +303,9 @@ module.exports = class App
     if btnClass.indexOf('ka-link') isnt -1 or btnClass.indexOf('mc-link') isnt -1
       macroButtonData.displayStyle = 'link'
 
-      if btnClass.match /(ka|mc)-link--s["|'| ]/gi
-        macroButtonData.size = 's'
-
-      replaceLinkRegex = new RegExp '(ka|mc)-link[-]{0,2}[a-z0-9-]*', 'gi'
-      btnClass = btnClass.replace replaceLinkRegex, ''
+      result = @manageLinkDataFromClass btnClass, macroButtonData
+      btnClass = result.linkClass
+      macroButtonData = result.macroData
 
     replaceRegex = new RegExp '(ka|mc)-button[-]{0,2}[a-z0-9-]*', 'gi'
     btnClass = btnClass.replace replaceRegex, ''
@@ -357,6 +352,7 @@ module.exports = class App
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
     if pLinkData.color then linkConfigStr += '' + pLinkData.indent + '    "color": "' + pLinkData.color + '",\n'
     if pLinkData.displayStyle then linkConfigStr += '' + pLinkData.indent + '    "displayStyle": "' + pLinkData.displayStyle + '",\n'
+    if pLinkData.style then linkConfigStr += '' + pLinkData.indent + '    "style": "' + pLinkData.style + '",\n'
     if pLinkData.size then linkConfigStr += '' + pLinkData.indent + '    "size": "' + pLinkData.size + '",\n'
     if pLinkData.target and pLinkData.target is '_blank'
       linkConfigStr += '' + pLinkData.indent + '    "targetBlank": true,\n'

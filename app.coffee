@@ -232,21 +232,24 @@ module.exports = class App
               if attr.name is 'type' then btnType = attr.value
 
             # Get data attributes
-            regexBtnDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
+            regexBtnDataAttr = /data-([\w]+)=("([^"]*?)"|'([^']*?)')/ig
             btnDataAttrs = []
             while ((btnDataAttr = regexBtnDataAttr.exec(btnHeadTag)) isnt null)
-              if btnDataAttr[1] is 'cerberus'
-                btnDataCerberusAttr = btnDataAttr[2]
-              else
-                btnDataAttrs.push
-                  name: btnDataAttr[1]
-                  value: btnDataAttr[2]
+              dataAttrValue = btnDataAttr[3] or btnDataAttr[4]
+              switch btnDataAttr[1]
+                when 'tagco' then btnDataTagcoAttr = dataAttrValue
+                when 'tcevent' then btnDataTceventAttr = dataAttrValue
+                when 'cerberus' then btnDataCerberusAttr = dataAttrValue
+                else
+                  btnDataAttrs.push
+                    name: btnDataAttr[1]
+                    value: dataAttrValue
 
             macroButtonData =
               type: btnType
               icon: iconData
-              #dataTagco: 'todo'
-              #dataTcevent: 'todo'
+              dataTagco: btnDataTagcoAttr
+              dataTcevent: btnDataTceventAttr
               cerberus: btnDataCerberusAttr
               dataAttributes: btnDataAttrs
               disabled: btnHeadTag.indexOf('disabled') isnt -1
@@ -254,7 +257,6 @@ module.exports = class App
               indent: btnIndent
 
             result = @manageButtonDataFromClass btnClass, macroButtonData
-            #console.log 'manageButtonDataFromClass result', result
             btnClass = result.btnClass
             macroButtonData = result.macroButtonData
 
@@ -389,6 +391,9 @@ module.exports = class App
     if pButtonData.width then linkConfigStr += '' + pButtonData.indent + '    "width": "' + pButtonData.width + '",\n'
     if pButtonData.icon and Object.keys(pButtonData.icon).length > 0 then linkConfigStr += '' + pButtonData.indent + '    "icon": ' + JSON.stringify(pButtonData.icon) + ',\n'
     if pButtonData.cssClass then linkConfigStr += '' + pButtonData.indent + '    "cssClass": "' + pButtonData.cssClass + '",\n'
+    if pButtonData.dataTagco and Object.keys(pButtonData.dataTagco).length > 0
+      linkConfigStr += '' + pButtonData.indent + '    "dataTagco": ' + JSON.stringify(pButtonData.dataTagco) + ',\n'
+    if pButtonData.dataTcevent then linkConfigStr += '' + pButtonData.indent + '    "dataTcevent": "' + pButtonData.dataTcevent + '",\n'
     if pButtonData.cerberus then linkConfigStr += '' + pButtonData.indent + '    "cerberus": "' + pButtonData.cerberus + '",\n'
     if pButtonData.dataAttributes and pButtonData.dataAttributes.length > 0
       linkConfigStr += '' + pButtonData.indent + '    "dataAttributes": ' + JSON.stringify(pButtonData.dataAttributes) + ',\n'

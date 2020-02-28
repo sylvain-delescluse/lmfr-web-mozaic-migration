@@ -122,22 +122,25 @@ module.exports = class App
               if attr.name is 'target' then ahrefTarget = attr.value
 
             # Get data attributes
-            regexLinkDataAttr = /data-([\w]+)=['|"]([^'|"]*)['|"]/ig
+            regexLinkDataAttr = /data-([\w]+)=("([^"]*?)"|'([^']*?)')/ig
             linkDataAttrs = []
             while ((linkDataAttr = regexLinkDataAttr.exec(ahrefHeadTag)) isnt null)
-              if linkDataAttr[1] is 'cerberus'
-                ahrefDataCerberusAttr = linkDataAttr[2]
-              else
-                linkDataAttrs.push
-                  name: linkDataAttr[1]
-                  value: linkDataAttr[2]
+              dataAttrValue = linkDataAttr[3] or linkDataAttr[4]
+              switch linkDataAttr[1]
+                when 'tagco' then linkDataTagcoAttr = dataAttrValue
+                when 'tcevent' then linkDataTceventAttr = dataAttrValue
+                when 'cerberus' then linkDataCerberusAttr = dataAttrValue
+                else
+                  linkDataAttrs.push
+                    name: linkDataAttr[1]
+                    value: dataAttrValue
 
             macroLinkData =
               href: ahrefHref
               icon: iconData
-              #dataTagco: 'todo'
-              #dataTcevent: 'todo'
-              cerberus: ahrefDataCerberusAttr
+              dataTagco: linkDataTagcoAttr
+              dataTcevent: linkDataTceventAttr
+              cerberus: linkDataCerberusAttr
               dataAttributes: linkDataAttrs
               target: ahrefTarget
               content: ahrefContent
@@ -359,7 +362,11 @@ module.exports = class App
       linkConfigStr += '' + pLinkData.indent + '    "targetBlank": true,\n'
     if pLinkData.icon and Object.keys(pLinkData.icon).length > 0 then linkConfigStr += '' + pLinkData.indent + '    "icon": ' + JSON.stringify(pLinkData.icon) + ',\n'
     if pLinkData.cssClass then linkConfigStr += '' + pLinkData.indent + '    "cssClass": "' + pLinkData.cssClass + '",\n'
+    if pLinkData.dataTagco
+      linkConfigStr += '' + pLinkData.indent + '    "dataTagco": "' + pLinkData.dataTagco + '",\n'
+    if pLinkData.dataTcevent then linkConfigStr += '' + pLinkData.indent + '    "dataTcevent": "' + pLinkData.dataTcevent + '",\n'
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
+    # ariaLabel ?
     if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0
       linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
 
@@ -391,10 +398,11 @@ module.exports = class App
     if pButtonData.width then linkConfigStr += '' + pButtonData.indent + '    "width": "' + pButtonData.width + '",\n'
     if pButtonData.icon and Object.keys(pButtonData.icon).length > 0 then linkConfigStr += '' + pButtonData.indent + '    "icon": ' + JSON.stringify(pButtonData.icon) + ',\n'
     if pButtonData.cssClass then linkConfigStr += '' + pButtonData.indent + '    "cssClass": "' + pButtonData.cssClass + '",\n'
-    if pButtonData.dataTagco and Object.keys(pButtonData.dataTagco).length > 0
-      linkConfigStr += '' + pButtonData.indent + '    "dataTagco": ' + JSON.stringify(pButtonData.dataTagco) + ',\n'
+    if pButtonData.dataTagco
+      linkConfigStr += '' + pButtonData.indent + '    "dataTagco": "' + pButtonData.dataTagco + '",\n'
     if pButtonData.dataTcevent then linkConfigStr += '' + pButtonData.indent + '    "dataTcevent": "' + pButtonData.dataTcevent + '",\n'
     if pButtonData.cerberus then linkConfigStr += '' + pButtonData.indent + '    "cerberus": "' + pButtonData.cerberus + '",\n'
+    # ariaLabel ?
     if pButtonData.dataAttributes and pButtonData.dataAttributes.length > 0
       linkConfigStr += '' + pButtonData.indent + '    "dataAttributes": ' + JSON.stringify(pButtonData.dataAttributes) + ',\n'
 

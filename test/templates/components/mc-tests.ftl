@@ -154,7 +154,7 @@
         data-tagco="{'titi' : 'tata', 'tutu' : 'toto'}"
         data-tcevent="tc-event-example"
         data-cerberus="BTN_addtocart"
-        data-truc="valeur de truc"
+        data-truc='valeur de truc (quote test)'
         data-truc2="valeur de truc 2"
     >
         <span class="mc-button__label">Button Data</span>

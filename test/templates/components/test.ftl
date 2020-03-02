@@ -32,4 +32,8 @@
     <button class="ka-button ka-button--s ka-button--full mu-mt-200 js-new-address-link">
         <@icons.icon iconPath="Navigation_Control_Circle--More_32px" class="component-addresses__icon--button" /> ${texts.addNewAddressButton}
     </button>
+
+    <button class="ka-button" aria-label="Read more about Seminole's new baby mayor">
+        <@icons.icon iconPath="Navigation_Control_Circle--More_32px" class="component-addresses__icon--button" /> With icon
+    </button>
 </div>

@@ -228,11 +228,13 @@ module.exports = class App
 
             btnClass = ''
             btnType = ''
+            btnAriaLabel = ''
 
             attrs = @getAttributes btnHeadTag
             attrs.forEach (attr) ->
               if attr.name is 'class' then btnClass = attr.value
               if attr.name is 'type' then btnType = attr.value
+              if attr.name is 'aria-label' then btnAriaLabel = attr.value
 
             # Get data attributes
             regexBtnDataAttr = /data-([\w]+)=("([^"]*?)"|'([^']*?)')/ig
@@ -254,6 +256,7 @@ module.exports = class App
               dataTagco: btnDataTagcoAttr
               dataTcevent: btnDataTceventAttr
               cerberus: btnDataCerberusAttr
+              ariaLabel: btnAriaLabel
               dataAttributes: btnDataAttrs
               disabled: btnHeadTag.indexOf('disabled') isnt -1
               content: btnContent
@@ -403,7 +406,8 @@ module.exports = class App
       linkConfigStr += '' + pButtonData.indent + '    "dataTagco": "' + pButtonData.dataTagco + '",\n'
     if pButtonData.dataTcevent then linkConfigStr += '' + pButtonData.indent + '    "dataTcevent": "' + pButtonData.dataTcevent + '",\n'
     if pButtonData.cerberus then linkConfigStr += '' + pButtonData.indent + '    "cerberus": "' + pButtonData.cerberus + '",\n'
-    # ariaLabel ?
+    if pButtonData.ariaLabel and pButtonData.ariaLabel isnt ''
+      linkConfigStr += '' + pButtonData.indent + '    "ariaLabel": "' + pButtonData.ariaLabel + '",\n'
     if pButtonData.dataAttributes and pButtonData.dataAttributes.length > 0
       linkConfigStr += '' + pButtonData.indent + '    "dataAttributes": ' + JSON.stringify(pButtonData.dataAttributes) + ',\n'
 

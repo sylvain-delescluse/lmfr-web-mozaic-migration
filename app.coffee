@@ -322,12 +322,13 @@ module.exports = class App
 
   getAttributes: (pHeadTagStr) ->
     # Get all attributes in tag head
-    regexAttr = /([\w-]+)=['|"]([^'|"]*)['|"]/ig
+    regexAttr = /([\w-]+)=("([^"]*?)"|'([^']*?)')/ig
     attrs = []
     while ((linkAttr = regexAttr.exec(pHeadTagStr)) isnt null)
+      attValue = linkAttr[3] or linkAttr[4]
       attrs.push
         name: linkAttr[1]
-        value: linkAttr[2]
+        value: attValue
 
     attrs
 

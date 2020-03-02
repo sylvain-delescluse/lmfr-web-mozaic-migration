@@ -114,12 +114,14 @@ module.exports = class App
             ahrefClass = ''
             ahrefHref = ''
             ahrefTarget = '_self'
+            ahrefAriaLabel = ''
 
             attrs = @getAttributes ahrefHeadTag
             attrs.forEach (attr) ->
               if attr.name is 'class' then ahrefClass = attr.value
               if attr.name is 'href' then ahrefHref = attr.value
               if attr.name is 'target' then ahrefTarget = attr.value
+              if attr.name is 'aria-label' then ahrefAriaLabel = attr.value
 
             # Get data attributes
             regexLinkDataAttr = /data-([\w]+)=("([^"]*?)"|'([^']*?)')/ig
@@ -141,6 +143,7 @@ module.exports = class App
               dataTagco: linkDataTagcoAttr
               dataTcevent: linkDataTceventAttr
               cerberus: linkDataCerberusAttr
+              ariaLabel: ahrefAriaLabel
               dataAttributes: linkDataAttrs
               target: ahrefTarget
               content: ahrefContent
@@ -362,7 +365,8 @@ module.exports = class App
       linkConfigStr += '' + pLinkData.indent + '    "dataTagco": "' + pLinkData.dataTagco + '",\n'
     if pLinkData.dataTcevent then linkConfigStr += '' + pLinkData.indent + '    "dataTcevent": "' + pLinkData.dataTcevent + '",\n'
     if pLinkData.cerberus then linkConfigStr += '' + pLinkData.indent + '    "cerberus": "' + pLinkData.cerberus + '",\n'
-    # ariaLabel ?
+    if pLinkData.ariaLabel and pLinkData.ariaLabel isnt ''
+      linkConfigStr += '' + pLinkData.indent + '    "ariaLabel": "' + pLinkData.ariaLabel + '",\n'
     if pLinkData.dataAttributes and pLinkData.dataAttributes.length > 0
       linkConfigStr += '' + pLinkData.indent + '    "dataAttributes": ' + JSON.stringify(pLinkData.dataAttributes) + ',\n'
 

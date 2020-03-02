@@ -21,7 +21,8 @@
     </section>
 
     <section>
-        <a href="/espace-perso/fidelite/ma-carte-2" class="ka-button">Autre lien</a>
+        <a href="/espace-perso/fidelite/ma-carte-2" class="ka-button" aria-label="Read more about Seminole's new baby mayor">Autre lien</a>
+        <a href="/espace-perso/fidelite/ma-carte-2" class="ka-button">Autre lien 2</a>
     </section>
 
     <button class="ka-button ka-button--secondary ka-button--full mu-mt-200 js-new-address-link">

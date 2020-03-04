@@ -229,12 +229,14 @@ module.exports = class App
             btnOnlyHeadTag = regexOnlyHeadTag.exec btn
             btnHeadTag = btnOnlyHeadTag[0]
 
+            btnId = ''
             btnClass = ''
             btnType = ''
             btnAriaLabel = ''
 
             attrs = @getAttributes btnHeadTag
             attrs.forEach (attr) ->
+              if attr.name is 'id' then btnId = attr.value
               if attr.name is 'class' then btnClass = attr.value
               if attr.name is 'type' then btnType = attr.value
               if attr.name is 'aria-label' then btnAriaLabel = attr.value
@@ -254,6 +256,7 @@ module.exports = class App
                     value: dataAttrValue
 
             macroButtonData =
+              id: btnId
               type: btnType
               icon: iconData
               dataTagco: btnDataTagcoAttr
@@ -398,6 +401,8 @@ module.exports = class App
     @macroButtonConfigCount++
 
     linkConfigStr = pButtonData.indent + '<#assign ' + configName + ' = {\n'
+    if pButtonData.id and pButtonData.id isnt ''
+      linkConfigStr += '' + pButtonData.indent + '    "id": "' + pButtonData.id + '",\n'
     if pButtonData.type then linkConfigStr += '' + pButtonData.indent + '    "type": "' + pButtonData.type + '",\n'
     if pButtonData.color then linkConfigStr += '' + pButtonData.indent + '    "color": "' + pButtonData.color + '",\n'
     if pButtonData.style then linkConfigStr += '' + pButtonData.indent + '    "style": "' + pButtonData.style + '",\n'

@@ -26,6 +26,8 @@
         <a id="js-link-example" href="/espace-perso/fidelite/ma-carte-2" >Link with id</a>
     </section>
 
+    <button id="js-button-example" class="ka-button ka-button--full">Button with id</button>
+
     <button class="ka-button ka-button--secondary ka-button--full mu-mt-200 js-new-address-link">
         <@icons.icon iconPath="Navigation_Control_Circle--More_32px" class="component-addresses__icon--button" /> ${texts.addNewAddressButton}
     </button>

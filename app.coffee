@@ -111,6 +111,7 @@ module.exports = class App
             ahrefOnlyHeadTag = regexOnlyHeadTag.exec ahref
             ahrefHeadTag = ahrefOnlyHeadTag[0]
 
+            ahrefId = ''
             ahrefClass = ''
             ahrefHref = ''
             ahrefTarget = '_self'
@@ -118,6 +119,7 @@ module.exports = class App
 
             attrs = @getAttributes ahrefHeadTag
             attrs.forEach (attr) ->
+              if attr.name is 'id' then ahrefId = attr.value
               if attr.name is 'class' then ahrefClass = attr.value
               if attr.name is 'href' then ahrefHref = attr.value
               if attr.name is 'target' then ahrefTarget = attr.value
@@ -138,6 +140,7 @@ module.exports = class App
                     value: dataAttrValue
 
             macroLinkData =
+              id: ahrefId
               href: ahrefHref
               icon: iconData
               dataTagco: linkDataTagcoAttr
@@ -356,6 +359,8 @@ module.exports = class App
     @macroLinkConfigCount++
 
     linkConfigStr = pLinkData.indent + '<#assign ' + configName + ' = {\n'
+    if pLinkData.id and pLinkData.id isnt ''
+      linkConfigStr += '' + pLinkData.indent + '    "id": "' + pLinkData.id + '",\n'
     if pLinkData.href then linkConfigStr += '' + pLinkData.indent + '    "href": "' + pLinkData.href + '",\n'
     if pLinkData.color then linkConfigStr += '' + pLinkData.indent + '    "color": "' + pLinkData.color + '",\n'
     if pLinkData.displayStyle then linkConfigStr += '' + pLinkData.indent + '    "displayStyle": "' + pLinkData.displayStyle + '",\n'

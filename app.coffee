@@ -59,16 +59,41 @@ module.exports = class App
             @commonMacrosPaths[pType] = filePath
 
         if Object.keys(@commonMacrosPaths).length > 0
+          filePaths = []
           for filePath in ftlFiles
             if filePath.indexOf('templates/components') isnt -1
-              if pType is 'link'
-                @processHref filePath
-              if pType is 'button'
-                @processButton filePath
+              filePaths.push filePath
+
+          @processSequence filePaths, pType
+
         else
           console.log ('File "templates/macros/common/' + pType + '.ftl" not found! Please upgrade "integration-web-core--socle"').red
       else
         console.log ('No "' + pExt + '" files found!').red
+
+
+  processSequence: (pFilePaths, pType, pId = 0) ->
+    if pId isnt pFilePaths.length
+      console.log '\nprocessSequence', pType, pId, '/', pFilePaths.length
+
+    if pId > pFilePaths.length - 1
+      console.log '\nprocessSequence COMPLETE'.green
+    else
+      filePath = pFilePaths[pId]
+
+      if pType is 'link'
+        @processHref filePath
+        .then () =>
+          @processSequence pFilePaths, pType, pId + 1
+        , (err) =>
+          @processSequence pFilePaths, pType, pId + 1
+
+      if pType is 'button'
+        @processButton filePath
+        .then () =>
+          @processSequence pFilePaths, pType, pId + 1
+        , (err) =>
+          @processSequence pFilePaths, pType, pId + 1
 
 
   detectMacroImport: (pFileData, pFilePath, pImportFilename) ->
@@ -86,10 +111,13 @@ module.exports = class App
 
 
   processHref: (pPath) ->
-    console.log ('Look for <a > in ' + pPath + '').blue
+    console.log ('Look for <a > in ' + pPath + '').blue.bold
+    deferred = q.defer()
+
     fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
+        deferred.reject err
       else
         hrefReg = /([ \t]*)<a[^\>]+href=['|"]([^'|"]*)['|"][^\>]*>([\w\W]*?)<\/a>/ig
         ahrefs = data.match hrefReg
@@ -97,7 +125,6 @@ module.exports = class App
           data = @detectMacroImport data, pPath, 'link'
 
           ahrefs.forEach (ahref) =>
-            #console.log '\nahref', ahref
 
             regLink = /([ \t]*)<a[^\>]+>([\w\W]*?)<\/a>/gi
             ahrefResult = regLink.exec ahref
@@ -161,9 +188,16 @@ module.exports = class App
             data = @replaceLinkWithMacro pPath, data, ahref, macroLinkData
 
           @writeDataInFile pPath, data
+          .then () ->
+            deferred.resolve()
+
+        else
+          deferred.resolve()
+
+    deferred.promise
 
 
-  manageLinkDataFromClass: (linkClass, macroData) ->
+  manageLinkDataFromClass: (linkClass, macroData, lookForButtonClasses = yes) ->
     if linkClass.match /(ka|mc)-link--s(?!\w)/gi
       macroData.size = 's'
 
@@ -186,7 +220,7 @@ module.exports = class App
       if macroData.icon
         macroData.icon.iconOnly = yes
 
-    if linkClass.indexOf('ka-button') isnt -1 or linkClass.indexOf('mc-button') isnt -1
+    if lookForButtonClasses and (linkClass.indexOf('ka-button') isnt -1 or linkClass.indexOf('mc-button') isnt -1)
       macroData.displayStyle = 'button'
 
       result = @manageButtonDataFromClass linkClass, macroData
@@ -204,10 +238,13 @@ module.exports = class App
 
 
   processButton: (pPath) ->
-    console.log ('Look for <button > in ' + pPath + '').blue
+    console.log ('Look for <button > in ' + pPath + '').blue.bold
+    deferred = q.defer()
+
     fs.readFile pPath, 'utf8', (err, data) =>
       if err
         console.log 'err:'.red, err
+        deferred.reject err
       else
         btnReg = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/gi
         btns = data.match btnReg
@@ -215,7 +252,6 @@ module.exports = class App
           data = @detectMacroImport data, pPath, 'button'
 
           btns.forEach (btn) =>
-            #console.log '\nbtn', btn
 
             btnRegex = /([ \t]*)<button[^\>]*>([\w\W]*?)<\/button>/gi
             btnResult = btnRegex.exec btn
@@ -268,7 +304,7 @@ module.exports = class App
               content: btnContent
               indent: btnIndent
 
-            result = @manageButtonDataFromClass btnClass, macroButtonData
+            result = @manageButtonDataFromClass btnClass, macroButtonData, no
             btnClass = result.btnClass
             macroButtonData = result.macroButtonData
 
@@ -277,9 +313,16 @@ module.exports = class App
             data = @replaceButtonWithMacro pPath, data, btn, macroButtonData
 
           @writeDataInFile pPath, data
+          .then () ->
+            deferred.resolve()
+
+        else
+          deferred.resolve()
+
+    deferred.promise
 
 
-  manageButtonDataFromClass: (btnClass, macroButtonData) ->
+  manageButtonDataFromClass: (btnClass, macroButtonData, lookForLinkClasses = yes) ->
 
     if btnClass.match /(ka|mc)-button--s(?!\w)/gi
       macroButtonData.size = 's'
@@ -312,10 +355,10 @@ module.exports = class App
     if btnClass.indexOf('-button--full') isnt -1
       macroButtonData.width = 'full'
 
-    if btnClass.indexOf('ka-link') isnt -1 or btnClass.indexOf('mc-link') isnt -1
+    if lookForLinkClasses and (btnClass.indexOf('ka-link') isnt -1 or btnClass.indexOf('mc-link') isnt -1)
       macroButtonData.displayStyle = 'link'
 
-      result = @manageLinkDataFromClass btnClass, macroButtonData
+      result = @manageLinkDataFromClass btnClass, macroButtonData, no
       btnClass = result.linkClass
       macroButtonData = result.macroData
 

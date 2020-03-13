@@ -223,7 +223,7 @@ module.exports = class App
     if lookForButtonClasses and (linkClass.indexOf('ka-button') isnt -1 or linkClass.indexOf('mc-button') isnt -1)
       macroData.displayStyle = 'button'
 
-      result = @manageButtonDataFromClass linkClass, macroData
+      result = @manageButtonDataFromClass linkClass, macroData, no
       linkClass = result.btnClass
       macroData = result.macroButtonData
 
@@ -304,7 +304,7 @@ module.exports = class App
               content: btnContent
               indent: btnIndent
 
-            result = @manageButtonDataFromClass btnClass, macroButtonData, no
+            result = @manageButtonDataFromClass btnClass, macroButtonData
             btnClass = result.btnClass
             macroButtonData = result.macroButtonData
 
